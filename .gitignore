@@ -1,0 +1,27 @@
+# Frontend
+node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Backend
+backend/bin/
+backend/tmp/
+backend/*.exe
+backend/*.out
+
+# Environment
+.env
+.env.local
+
+# Editors
+.vscode/
+.idea/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
