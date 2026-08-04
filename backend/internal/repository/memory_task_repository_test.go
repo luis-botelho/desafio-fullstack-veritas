@@ -2,6 +2,7 @@ package repository
 
 import (
 	"testing"
+	"time"
 
 	"github.com/luis-botelho/desafio-fullstack-veritas/backend/internal/domain"
 )
@@ -47,13 +48,31 @@ func TestMemoryTaskRepositorySaveAndFindByID(t *testing.T) {
 func TestMemoryTaskRepositoryList(t *testing.T) {
 	repository := NewMemoryTaskRepository()
 
-	repository.Save(createTestTask(t, "task-1"))
-	repository.Save(createTestTask(t, "task-2"))
+	newestTask := createTestTask(t, "task-newest")
+	newestTask.CreatedAt = time.Date(2026, time.January, 3, 12, 0, 0, 0, time.UTC)
+
+	oldestTask := createTestTask(t, "task-oldest")
+	oldestTask.CreatedAt = time.Date(2026, time.January, 1, 12, 0, 0, 0, time.UTC)
+
+	middleTask := createTestTask(t, "task-middle")
+	middleTask.CreatedAt = time.Date(2026, time.January, 2, 12, 0, 0, 0, time.UTC)
+
+	repository.Save(newestTask)
+	repository.Save(oldestTask)
+	repository.Save(middleTask)
 
 	tasks := repository.List()
 
-	if len(tasks) != 2 {
-		t.Errorf("expected 2 tasks, got %d", len(tasks))
+	if len(tasks) != 3 {
+		t.Fatalf("expected 3 tasks, got %d", len(tasks))
+	}
+
+	expectedIDs := []string{"task-oldest", "task-middle", "task-newest"}
+
+	for i, expectedID := range expectedIDs {
+		if tasks[i].ID != expectedID {
+			t.Errorf("expected task at position %d to have ID %q, got %q", i, expectedID, tasks[i].ID)
+		}
 	}
 }
 

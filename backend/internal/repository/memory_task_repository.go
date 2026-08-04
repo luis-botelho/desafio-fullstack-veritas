@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"sort"
 	"sync"
 
 	"github.com/luis-botelho/desafio-fullstack-veritas/backend/internal/domain"
@@ -30,11 +31,13 @@ func (r *MemoryTaskRepository) List() []domain.Task {
 
 	tasks := make([]domain.Task, 0, len(r.tasks))
 
-	// Map iteration is intentionally unordered; ordering belongs to the caller
-	// until the API defines an explicit sorting contract.
 	for _, task := range r.tasks {
 		tasks = append(tasks, task)
 	}
+
+	sort.SliceStable(tasks, func(i, j int) bool {
+		return tasks[i].CreatedAt.Before(tasks[j].CreatedAt)
+	})
 
 	return tasks
 }
