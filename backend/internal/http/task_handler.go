@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/luis-botelho/desafio-fullstack-veritas/backend/internal/domain"
 	"github.com/luis-botelho/desafio-fullstack-veritas/backend/internal/repository"
 )
@@ -16,6 +17,12 @@ type TaskHandler struct {
 }
 
 type CreateTaskRequest struct {
+	Title       string            `json:"title"`
+	Description string            `json:"description"`
+	Status      domain.TaskStatus `json:"status"`
+}
+
+type UpdateTaskRequest struct {
 	Title       string            `json:"title"`
 	Description string            `json:"description"`
 	Status      domain.TaskStatus `json:"status"`
@@ -103,6 +110,82 @@ func (h *TaskHandler) CreateTask(
 	h.repository.Save(*task)
 
 	writeJSON(w, http.StatusCreated, task)
+}
+
+func (h *TaskHandler) UpdateTask(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	id := chi.URLParam(r, "id")
+
+	task, err := h.repository.FindByID(id)
+
+	if err != nil {
+		if errors.Is(err, repository.ErrTaskNotFound) {
+			writeError(
+				w,
+				http.StatusNotFound,
+				"task not found",
+			)
+			return
+		}
+
+		writeError(
+			w,
+			http.StatusInternalServerError,
+			"failed to find task",
+		)
+		return
+	}
+
+	var request UpdateTaskRequest
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+
+	if err := decoder.Decode(&request); err != nil {
+		writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid request body",
+		)
+		return
+	}
+
+	if err := task.Update(
+		request.Title,
+		request.Description,
+		request.Status,
+	); err != nil {
+		switch {
+		case errors.Is(err, domain.ErrTaskTitleRequired):
+			writeError(
+				w,
+				http.StatusBadRequest,
+				"task title is required",
+			)
+
+		case errors.Is(err, domain.ErrInvalidTaskStatus):
+			writeError(
+				w,
+				http.StatusBadRequest,
+				"invalid task status",
+			)
+
+		default:
+			writeError(
+				w,
+				http.StatusInternalServerError,
+				"failed to update task",
+			)
+		}
+
+		return
+	}
+
+	h.repository.Save(task)
+
+	writeJSON(w, http.StatusOK, task)
 }
 
 func writeJSON(

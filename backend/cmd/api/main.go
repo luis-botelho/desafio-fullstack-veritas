@@ -42,6 +42,7 @@ func main() {
 	router.Get("/health", healthHandler)
 	router.Get("/tasks", taskHandler.ListTasks)
 	router.Post("/tasks", taskHandler.CreateTask)
+	router.Put("/tasks/{id}", taskHandler.UpdateTask)
 
 	server := &http.Server{
 		Addr:    ":8080",
