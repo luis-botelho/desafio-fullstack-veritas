@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+
 	httpapi "github.com/luis-botelho/desafio-fullstack-veritas/backend/internal/http"
 	"github.com/luis-botelho/desafio-fullstack-veritas/backend/internal/repository"
 )
@@ -18,28 +20,16 @@ func healthHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	if r.Method != http.MethodGet {
-		http.Error(
-			w,
-			"method not allowed",
-			http.StatusMethodNotAllowed,
-		)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
 	response := HealthResponse{
 		Status:  "ok",
 		Service: "veritas-kanban-api",
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		log.Printf(
-			"failed to encode health response: %v",
-			err,
-		)
+		log.Printf("failed to encode health response: %v", err)
 	}
 }
 
@@ -47,14 +37,15 @@ func main() {
 	taskRepository := repository.NewMemoryTaskRepository()
 	taskHandler := httpapi.NewTaskHandler(taskRepository)
 
-	mux := http.NewServeMux()
+	router := chi.NewRouter()
 
-	mux.HandleFunc("/health", healthHandler)
-	mux.HandleFunc("/tasks", taskHandler.Tasks)
+	router.Get("/health", healthHandler)
+	router.Get("/tasks", taskHandler.ListTasks)
+	router.Post("/tasks", taskHandler.CreateTask)
 
 	server := &http.Server{
 		Addr:    ":8080",
-		Handler: mux,
+		Handler: router,
 	}
 
 	log.Println("API running at http://localhost:8080")

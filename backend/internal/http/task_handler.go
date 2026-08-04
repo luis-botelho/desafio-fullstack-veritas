@@ -33,33 +33,16 @@ func NewTaskHandler(
 	}
 }
 
-func (h *TaskHandler) Tasks(
+func (h *TaskHandler) ListTasks(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	switch r.Method {
-	case http.MethodGet:
-		h.listTasks(w)
-
-	case http.MethodPost:
-		h.createTask(w, r)
-
-	default:
-		writeError(
-			w,
-			http.StatusMethodNotAllowed,
-			"method not allowed",
-		)
-	}
-}
-
-func (h *TaskHandler) listTasks(w http.ResponseWriter) {
 	tasks := h.repository.List()
 
 	writeJSON(w, http.StatusOK, tasks)
 }
 
-func (h *TaskHandler) createTask(
+func (h *TaskHandler) CreateTask(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {

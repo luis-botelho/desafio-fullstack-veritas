@@ -28,6 +28,8 @@ type Task struct {
 	UpdatedAt   time.Time  `json:"updatedAt"`
 }
 
+// --- Lifecycle -------------------------------------------------------------
+
 func NewTask(
 	id string,
 	title string,
@@ -51,6 +53,8 @@ func NewTask(
 }
 
 func (t *Task) Validate() error {
+	// Keep normalization in the domain so every entry point persists the same
+	// representation, regardless of whether the task came from HTTP or elsewhere.
 	t.Title = strings.TrimSpace(t.Title)
 	t.Description = strings.TrimSpace(t.Description)
 
@@ -82,6 +86,8 @@ func (t *Task) Update(
 
 	return nil
 }
+
+// --- Status rules ----------------------------------------------------------
 
 func (s TaskStatus) IsValid() bool {
 	switch s {
