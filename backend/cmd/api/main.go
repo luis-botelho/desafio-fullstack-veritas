@@ -33,6 +33,7 @@ func healthHandler(
 	}
 }
 
+// main is the entry point of the application. It sets up the HTTP server and routes.
 func main() {
 	taskRepository := repository.NewMemoryTaskRepository()
 	taskHandler := httpapi.NewTaskHandler(taskRepository)
@@ -43,6 +44,7 @@ func main() {
 	router.Get("/tasks", taskHandler.ListTasks)
 	router.Post("/tasks", taskHandler.CreateTask)
 	router.Put("/tasks/{id}", taskHandler.UpdateTask)
+	router.Delete("/tasks/{id}", taskHandler.DeleteTask)
 
 	server := &http.Server{
 		Addr:    ":8080",

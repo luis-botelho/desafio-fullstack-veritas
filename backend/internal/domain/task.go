@@ -28,8 +28,6 @@ type Task struct {
 	UpdatedAt   time.Time  `json:"updatedAt"`
 }
 
-// --- Lifecycle -------------------------------------------------------------
-
 func NewTask(
 	id string,
 	title string,
@@ -69,6 +67,7 @@ func (t *Task) Validate() error {
 	return nil
 }
 
+// Update updates the task with the provided information.
 func (t *Task) Update(
 	title string,
 	description string,
@@ -86,8 +85,6 @@ func (t *Task) Update(
 
 	return nil
 }
-
-// --- Status rules ----------------------------------------------------------
 
 func (s TaskStatus) IsValid() bool {
 	switch s {

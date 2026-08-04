@@ -32,6 +32,7 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
+// NewTaskHandler creates a new instance of TaskHandler with the provided task repository.
 func NewTaskHandler(
 	taskRepository *repository.MemoryTaskRepository,
 ) *TaskHandler {
@@ -40,6 +41,7 @@ func NewTaskHandler(
 	}
 }
 
+// ListTasks handles the HTTP GET request to list all tasks.
 func (h *TaskHandler) ListTasks(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -49,6 +51,7 @@ func (h *TaskHandler) ListTasks(
 	writeJSON(w, http.StatusOK, tasks)
 }
 
+// CreateTask handles the HTTP POST request to create a new task.
 func (h *TaskHandler) CreateTask(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -112,6 +115,7 @@ func (h *TaskHandler) CreateTask(
 	writeJSON(w, http.StatusCreated, task)
 }
 
+// UpdateTask handles the HTTP PUT request to update an existing task.
 func (h *TaskHandler) UpdateTask(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -186,6 +190,34 @@ func (h *TaskHandler) UpdateTask(
 	h.repository.Save(task)
 
 	writeJSON(w, http.StatusOK, task)
+}
+
+// DeleteTask handles the HTTP DELETE request to delete an existing task.
+func (h *TaskHandler) DeleteTask(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	id := chi.URLParam(r, "id")
+
+	if err := h.repository.Delete(id); err != nil {
+		if errors.Is(err, repository.ErrTaskNotFound) {
+			writeError(
+				w,
+				http.StatusNotFound,
+				"task not found",
+			)
+			return
+		}
+
+		writeError(
+			w,
+			http.StatusInternalServerError,
+			"failed to delete task",
+		)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func writeJSON(
