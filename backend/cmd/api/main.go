@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 
 	httpapi "github.com/luis-botelho/desafio-fullstack-veritas/backend/internal/http"
 	"github.com/luis-botelho/desafio-fullstack-veritas/backend/internal/repository"
@@ -33,12 +34,29 @@ func healthHandler(
 	}
 }
 
-// main is the entry point of the application. It sets up the HTTP server and routes.
 func main() {
 	taskRepository := repository.NewMemoryTaskRepository()
 	taskHandler := httpapi.NewTaskHandler(taskRepository)
 
 	router := chi.NewRouter()
+
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{
+			"http://localhost:5173",
+		},
+		AllowedMethods: []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodDelete,
+			http.MethodOptions,
+		},
+		AllowedHeaders: []string{
+			"Accept",
+			"Content-Type",
+		},
+		MaxAge: 300,
+	}))
 
 	router.Get("/health", healthHandler)
 	router.Get("/tasks", taskHandler.ListTasks)
