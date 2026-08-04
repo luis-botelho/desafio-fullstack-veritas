@@ -1,15 +1,22 @@
+import { useState } from "react";
+
 import "./App.css";
 
+import { KanbanColumn } from "./components/KanbanColumn";
+import { TaskForm } from "./components/TaskForm";
 import { useTasks } from "./hooks/useTasks";
 
-import type { TaskStatus } from "./types/task";
+import type {
+  Task,
+  TaskStatus,
+} from "./types/task";
 
-interface KanbanColumn {
+interface KanbanColumnConfig {
   title: string;
   status: TaskStatus;
 }
 
-const columns: KanbanColumn[] = [
+const columns: KanbanColumnConfig[] = [
   {
     title: "A Fazer",
     status: "todo",
@@ -25,13 +32,31 @@ const columns: KanbanColumn[] = [
 ];
 
 function App() {
+  const [taskToDelete, setTaskToDelete] =
+    useState<Task | null>(null);
+
+  const [isTaskFormOpen, setIsTaskFormOpen] =
+    useState(false);
+
+  const [selectedTask, setSelectedTask] =
+    useState<Task | null>(null);
+
   const {
     tasks,
     isLoading,
+    isSubmitting,
     error,
     loadTasks,
+    createTask,
+    updateTask,
+    deleteTask,
     clearError,
   } = useTasks();
+
+  function closeTaskForm() {
+    setIsTaskFormOpen(false);
+    setSelectedTask(null);
+  }
 
   if (isLoading) {
     return (
@@ -49,7 +74,13 @@ function App() {
           <h1>Mini Kanban</h1>
         </div>
 
-        <button type="button">
+        <button
+          type="button"
+          onClick={() => {
+            setSelectedTask(null);
+            setIsTaskFormOpen(true);
+          }}
+        >
           Nova tarefa
         </button>
       </header>
@@ -71,37 +102,143 @@ function App() {
       )}
 
       <section aria-label="Quadro Kanban">
-        {columns.map((column) => {
-          const columnTasks = tasks.filter(
-            (task) => task.status === column.status,
-          );
-
-          return (
-            <article key={column.status}>
-              <header>
-                <h2>{column.title}</h2>
-                <span>{columnTasks.length}</span>
-              </header>
-
-              <div>
-                {columnTasks.length === 0 ? (
-                  <p>Nenhuma tarefa nesta coluna.</p>
-                ) : (
-                  columnTasks.map((task) => (
-                    <article key={task.id}>
-                      <h3>{task.title}</h3>
-
-                      {task.description && (
-                        <p>{task.description}</p>
-                      )}
-                    </article>
-                  ))
-                )}
-              </div>
-            </article>
-          );
-        })}
+        {columns.map((column) => (
+          <KanbanColumn
+            key={column.status}
+            title={column.title}
+            status={column.status}
+            tasks={tasks}
+            onEditTask={(task) => {
+              setSelectedTask(task);
+              setIsTaskFormOpen(true);
+            }}
+            onDeleteTask={(task) => {
+              setTaskToDelete(task);
+            }}
+          />
+        ))}
       </section>
+
+      {isTaskFormOpen && (
+        <div className="modal-backdrop">
+          <section
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="task-form-title"
+          >
+            <header>
+              <div>
+                <p>
+                  {selectedTask
+                    ? "Editar tarefa"
+                    : "Nova tarefa"}
+                </p>
+
+                <h2 id="task-form-title">
+                  {selectedTask
+                    ? "Atualizar tarefa"
+                    : "Adicionar ao quadro"}
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                aria-label="Fechar formulário"
+                onClick={closeTaskForm}
+              >
+                ×
+              </button>
+            </header>
+
+            <TaskForm
+              key={selectedTask?.id ?? "new-task"}
+              task={selectedTask ?? undefined}
+              isSubmitting={isSubmitting}
+              onSubmit={async (input) => {
+                const success = selectedTask
+                  ? await updateTask(
+                    selectedTask.id,
+                    input,
+                  )
+                  : await createTask(input);
+
+                if (success) {
+                  closeTaskForm();
+                }
+
+                return success;
+              }}
+              onCancel={closeTaskForm}
+            />
+          </section>
+        </div>
+      )}
+      {taskToDelete && (
+        <div className="modal-backdrop">
+          <section
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-task-title"
+          >
+            <header>
+              <div>
+                <p>Excluir tarefa</p>
+                <h2 id="delete-task-title">
+                  Confirmar exclusão
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                aria-label="Fechar confirmação"
+                onClick={() => {
+                  setTaskToDelete(null);
+                }}
+              >
+                ×
+              </button>
+            </header>
+
+            <p>
+              Tem certeza que deseja excluir{" "}
+              <strong>{taskToDelete.title}</strong>?
+            </p>
+
+            <div className="delete-dialog__actions">
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => {
+                  setTaskToDelete(null);
+                }}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className="danger-button"
+                disabled={isSubmitting}
+                onClick={async () => {
+                  const success = await deleteTask(
+                    taskToDelete.id,
+                  );
+
+                  if (success) {
+                    setTaskToDelete(null);
+                  }
+                }}
+              >
+                {isSubmitting
+                  ? "Excluindo..."
+                  : "Excluir tarefa"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
