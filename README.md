@@ -102,8 +102,5 @@ Este repositório é dividido em dois projetos independentes:
 
 ```mermaid
 flowchart LR
-    A[React + TypeScript<br/>Frontend]
-        -->|HTTP / JSON|
-    B[Go + Chi Router]
-
-    B --> C[(Memory Repository)]
+    A["React + TypeScript<br/>Frontend"] -->|"HTTP / JSON"| B["Go + Chi Router"]
+    B -->|"sync.RWMutex"| C[("Memory Repository")]
