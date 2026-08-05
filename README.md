@@ -57,19 +57,20 @@ flowchart LR
     B -->|sync.RWMutex| C[(map em memória)]
 ```
 
-Cada lado tem sua própria organização interna e suas próprias decisões técnicas
-documentadas nos READMEs específicos — ver [`backend/README.md`](./backend/README.md)
+Cada lado tem sua própria organização interna e decisões técnicas específicas,
+documentadas nos READMEs individuais — ver [`backend/README.md`](./backend/README.md)
 e [`frontend/README.md`](./frontend/README.md).
 
 ## 📁 Estrutura
 
 ```text
 desafio-fullstack-veritas/
-├── backend/          # API REST em Go
-├── frontend/         # Interface em React + TypeScript
+├── backend/          # API REST em Go (inclui Dockerfile)
+├── frontend/         # Interface em React + TypeScript (inclui Dockerfile, nginx.conf)
 ├── docs/
 │   ├── user-flow.mmd
 │   └── user-flow.png
+├── docker-compose.yml
 └── README.md         # este arquivo
 ```
 
@@ -87,6 +88,32 @@ desafio-fullstack-veritas/
 git clone https://github.com/luis-botelho/desafio-fullstack-veritas.git
 cd desafio-fullstack-veritas
 ```
+
+### Opção rápida com Docker
+
+Com Docker e Docker Compose instalados, execute na raiz do projeto:
+
+```bash
+docker compose up --build
+```
+
+A aplicação ficará disponível em:
+
+- Frontend: http://localhost:5173
+- Backend: http://localhost:8080
+
+Para encerrar:
+
+```bash
+docker compose down
+```
+
+O uso de Docker é opcional. Também é possível executar frontend e backend
+manualmente, conforme as instruções abaixo.
+
+> Dockerfiles separados para frontend e backend, orquestrados pelo
+> `docker-compose.yml` na raiz — só pra facilitar a avaliação e evitar
+> diferenças de ambiente, sem substituir a execução manual.
 
 ### Backend (terminal 1)
 
