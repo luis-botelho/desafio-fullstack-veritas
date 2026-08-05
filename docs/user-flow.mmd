@@ -1,0 +1,44 @@
+flowchart TD
+    A(["Usuário acessa o Mini Kanban"]) --> B["Frontend solicita as tarefas"]
+    B --> C["GET /tasks"]
+    C --> D{"Requisição concluída?"}
+
+    D -- "Não" --> E["Exibir mensagem de erro"]
+    E --> F["Usuário seleciona Tentar novamente"]
+    F --> C
+
+    D -- "Sim" --> G["Exibir quadro com três colunas"]
+    G --> H{"Ação do usuário"}
+
+    H -- "Criar" --> I["Clicar em Nova tarefa ou no botão +"]
+    I --> J["Preencher título, descrição e coluna"]
+    J --> K{"Dados válidos?"}
+    K -- "Não" --> L["Exibir erro de validação"]
+    L --> J
+    K -- "Sim" --> M["POST /tasks"]
+    M --> N["Adicionar card na coluna escolhida"]
+    N --> O["Exibir feedback de sucesso"]
+    O --> G
+
+    H -- "Abrir ou editar" --> P["Clicar no card"]
+    P --> Q["Abrir modal com os dados"]
+    Q --> R["Alterar dados ou status"]
+    R --> S["PUT /tasks/{id}"]
+    S --> T["Atualizar card no quadro"]
+    T --> U["Exibir feedback de sucesso"]
+    U --> G
+
+    H -- "Mover" --> V["Arrastar card para outra coluna"]
+    V --> W["PUT /tasks/{id} com novo status"]
+    W --> X["Exibir card na nova coluna"]
+    X --> Y["Exibir feedback de movimentação"]
+    Y --> G
+
+    H -- "Excluir" --> Z["Abrir card e selecionar Excluir"]
+    Z --> AA["Exibir confirmação"]
+    AA --> AB{"Confirmar exclusão?"}
+    AB -- "Não" --> G
+    AB -- "Sim" --> AC["DELETE /tasks/{id}"]
+    AC --> AD["Remover card do quadro"]
+    AD --> AE["Exibir feedback de exclusão"]
+    AE --> G
