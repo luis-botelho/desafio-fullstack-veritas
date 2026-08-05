@@ -1,4 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import {
   createTask,
@@ -7,21 +11,29 @@ import {
   updateTask,
 } from "../services/taskApi";
 
-import type { CreateTaskInput, Task, UpdateTaskInput } from "../types/task";
-
 import {
   getTaskCreatedMessage,
   getTaskDeletedMessage,
   getTaskUpdatedMessage,
 } from "../utils/taskFeedback";
 
+import type {
+  CreateTaskInput,
+  Task,
+  UpdateTaskInput,
+} from "../types/task";
+
 export function useTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
 
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [error, setError] =
+    useState<string | null>(null);
+
+  const [successMessage, setSuccessMessage] =
+    useState<string | null>(null);
 
   const loadTasks = useCallback(async () => {
     try {
@@ -43,38 +55,18 @@ export function useTasks() {
   }, []);
 
   useEffect(() => {
-    let isCancelled = false;
-
-    async function fetchInitialTasks() {
-      try {
-        const data = await getTasks();
-
-        if (!isCancelled) {
-          setTasks(data);
-        }
-      } catch (err) {
-        if (!isCancelled) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Não foi possível carregar as tarefas.",
-          );
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    void fetchInitialTasks();
+    const timer = window.setTimeout(() => {
+      void loadTasks();
+    }, 0);
 
     return () => {
-      isCancelled = true;
+      window.clearTimeout(timer);
     };
-  }, []);
+  }, [loadTasks]);
 
-  async function handleCreateTask(input: CreateTaskInput): Promise<boolean> {
+  async function handleCreateTask(
+    input: CreateTaskInput,
+  ): Promise<boolean> {
     try {
       setIsSubmitting(true);
       setError(null);
@@ -82,14 +74,21 @@ export function useTasks() {
 
       const newTask = await createTask(input);
 
-      setTasks((currentTasks) => [...currentTasks, newTask]);
+      setTasks((currentTasks) => [
+        ...currentTasks,
+        newTask,
+      ]);
 
-      setSuccessMessage(getTaskCreatedMessage(newTask));
+      setSuccessMessage(
+        getTaskCreatedMessage(newTask),
+      );
 
       return true;
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Não foi possível criar a tarefa.",
+        err instanceof Error
+          ? err.message
+          : "Não foi possível criar a tarefa.",
       );
 
       return false;
@@ -102,21 +101,32 @@ export function useTasks() {
     id: string,
     input: UpdateTaskInput,
   ): Promise<boolean> {
+    const previousTask = tasks.find(
+      (task) => task.id === id,
+    );
+
     try {
       setIsSubmitting(true);
       setError(null);
       setSuccessMessage(null);
 
-      const updatedTask = await updateTask(id, input);
-      const previousTask = tasks.find((task) => task.id === id);
+      const updatedTask = await updateTask(
+        id,
+        input,
+      );
 
       setTasks((currentTasks) =>
-        currentTasks.map((task) => (task.id === id ? updatedTask : task)),
+        currentTasks.map((task) =>
+          task.id === id ? updatedTask : task,
+        ),
       );
 
       setSuccessMessage(
         previousTask
-          ? getTaskUpdatedMessage(previousTask, updatedTask)
+          ? getTaskUpdatedMessage(
+              previousTask,
+              updatedTask,
+            )
           : `Tarefa "${updatedTask.title}" atualizada com sucesso.`,
       );
 
@@ -134,7 +144,9 @@ export function useTasks() {
     }
   }
 
-  async function handleDeleteTask(task: Task): Promise<boolean> {
+  async function handleDeleteTask(
+    task: Task,
+  ): Promise<boolean> {
     try {
       setIsSubmitting(true);
       setError(null);
@@ -143,17 +155,22 @@ export function useTasks() {
       await deleteTask(task.id);
 
       setTasks((currentTasks) =>
-        currentTasks.filter((currentTask) => currentTask.id !== task.id),
+        currentTasks.filter(
+          (currentTask) =>
+            currentTask.id !== task.id,
+        ),
       );
 
-      setSuccessMessage(getTaskDeletedMessage(task));
+      setSuccessMessage(
+        getTaskDeletedMessage(task),
+      );
 
       return true;
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "Não foi possível excluir a tarefa.",
+          : `Não foi possível excluir a tarefa "${task.title}".`,
       );
 
       return false;
@@ -162,13 +179,13 @@ export function useTasks() {
     }
   }
 
-  function clearError() {
+  const clearError = useCallback(() => {
     setError(null);
-  }
+  }, []);
 
-  function clearSuccessMessage() {
+  const clearSuccessMessage = useCallback(() => {
     setSuccessMessage(null);
-  }
+  }, []);
 
   return {
     tasks,
