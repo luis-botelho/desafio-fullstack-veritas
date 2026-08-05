@@ -9,11 +9,19 @@ import {
 
 import type { CreateTaskInput, Task, UpdateTaskInput } from "../types/task";
 
+import {
+  getTaskCreatedMessage,
+  getTaskDeletedMessage,
+  getTaskUpdatedMessage,
+} from "../utils/taskFeedback";
+
 export function useTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const loadTasks = useCallback(async () => {
     try {
@@ -70,10 +78,13 @@ export function useTasks() {
     try {
       setIsSubmitting(true);
       setError(null);
+      setSuccessMessage(null);
 
       const newTask = await createTask(input);
 
       setTasks((currentTasks) => [...currentTasks, newTask]);
+
+      setSuccessMessage(getTaskCreatedMessage(newTask));
 
       return true;
     } catch (err) {
@@ -94,11 +105,19 @@ export function useTasks() {
     try {
       setIsSubmitting(true);
       setError(null);
+      setSuccessMessage(null);
 
       const updatedTask = await updateTask(id, input);
+      const previousTask = tasks.find((task) => task.id === id);
 
       setTasks((currentTasks) =>
         currentTasks.map((task) => (task.id === id ? updatedTask : task)),
+      );
+
+      setSuccessMessage(
+        previousTask
+          ? getTaskUpdatedMessage(previousTask, updatedTask)
+          : `Tarefa "${updatedTask.title}" atualizada com sucesso.`,
       );
 
       return true;
@@ -115,14 +134,19 @@ export function useTasks() {
     }
   }
 
-  async function handleDeleteTask(id: string): Promise<boolean> {
+  async function handleDeleteTask(task: Task): Promise<boolean> {
     try {
       setIsSubmitting(true);
       setError(null);
+      setSuccessMessage(null);
 
-      await deleteTask(id);
+      await deleteTask(task.id);
 
-      setTasks((currentTasks) => currentTasks.filter((task) => task.id !== id));
+      setTasks((currentTasks) =>
+        currentTasks.filter((currentTask) => currentTask.id !== task.id),
+      );
+
+      setSuccessMessage(getTaskDeletedMessage(task));
 
       return true;
     } catch (err) {
@@ -142,15 +166,21 @@ export function useTasks() {
     setError(null);
   }
 
+  function clearSuccessMessage() {
+    setSuccessMessage(null);
+  }
+
   return {
     tasks,
     isLoading,
     isSubmitting,
     error,
+    successMessage,
     loadTasks,
     createTask: handleCreateTask,
     updateTask: handleUpdateTask,
     deleteTask: handleDeleteTask,
     clearError,
+    clearSuccessMessage,
   };
 }

@@ -1,0 +1,117 @@
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.task-form > div:not(.task-form__actions) {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-form label {
+  color: var(--color-text);
+
+  font-size: 0.88rem;
+  font-weight: 750;
+}
+
+.task-form input,
+.task-form textarea,
+.task-form select {
+  width: 100%;
+  padding: 12px 14px;
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.task-form input:hover,
+.task-form textarea:hover,
+.task-form select:hover {
+  border-color: #c5cad6;
+}
+
+.task-form input:focus,
+.task-form textarea:focus,
+.task-form select:focus {
+  border-color: var(--color-primary);
+  outline: none;
+
+  background: white;
+
+  box-shadow: 0 0 0 4px var(--color-focus);
+}
+
+.task-form textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.task-form > p[role="alert"] {
+  margin: 0;
+  padding: 11px 13px;
+
+  border-radius: var(--radius-sm);
+
+  background: var(--color-danger-soft);
+  color: #a11d2c;
+
+  font-size: 0.88rem;
+}
+
+.task-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+
+  padding-top: 4px;
+}
+
+.task-form__actions button {
+  min-height: 43px;
+  padding: 0 17px;
+
+  border-radius: var(--radius-sm);
+
+  font-weight: 750;
+}
+
+.task-form__actions button:first-child {
+  border: 1px solid var(--color-border);
+
+  background: white;
+  color: var(--color-text);
+}
+
+.task-form__actions button:last-child {
+  border: 0;
+
+  background: var(--color-primary);
+  color: white;
+
+  box-shadow: 0 8px 20px rgb(91 91 214 / 20%);
+}
+
+.task-form__actions button:last-child:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+@media (max-width: 480px) {
+  .task-form__actions {
+    flex-direction: column-reverse;
+  }
+
+  .task-form__actions button {
+    width: 100%;
+  }
+}

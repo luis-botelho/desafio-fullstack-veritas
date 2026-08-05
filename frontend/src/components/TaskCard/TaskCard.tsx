@@ -4,7 +4,9 @@ import {
   type KeyboardEvent,
 } from "react";
 
-import type { Task } from "../types/task";
+import "./TaskCard.css";
+
+import type { Task } from "../../types/task";
 
 interface TaskCardProps {
   task: Task;

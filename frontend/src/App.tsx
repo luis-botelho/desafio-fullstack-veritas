@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import "./App.css";
 
-import { KanbanColumn } from "./components/KanbanColumn";
-import { Modal } from "./components/Modal";
-import { TaskForm } from "./components/TaskForm";
+import { KanbanColumn } from "./components/KanbanColumn/KanbanColumn";
+import { Modal } from "./components/Modal/Modal";
+import { TaskForm } from "./components/TaskForm/TaskForm";
 import { useTasks } from "./hooks/useTasks";
 
 import type {
@@ -42,17 +42,38 @@ function App() {
   const [taskToDelete, setTaskToDelete] =
     useState<Task | null>(null);
 
+  const [
+    initialTaskStatus,
+    setInitialTaskStatus,
+  ] = useState<TaskStatus>("todo");
+
   const {
     tasks,
     isLoading,
     isSubmitting,
     error,
+    successMessage,
     loadTasks,
     createTask,
     updateTask,
     deleteTask,
     clearError,
+    clearSuccessMessage,
   } = useTasks();
+
+  useEffect(() => {
+    if (!successMessage) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      clearSuccessMessage();
+    }, 3000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [successMessage, clearSuccessMessage]);
 
   function closeTaskForm() {
     setIsTaskFormOpen(false);
@@ -113,6 +134,7 @@ function App() {
           type="button"
           onClick={() => {
             setSelectedTask(null);
+            setInitialTaskStatus("todo");
             setIsTaskFormOpen(true);
           }}
         >
@@ -135,6 +157,22 @@ function App() {
           </button>
         </section>
       )}
+      {successMessage && (
+        <section
+          className="success-feedback"
+          role="status"
+        >
+          <p>{successMessage}</p>
+
+          <button
+            type="button"
+            aria-label="Fechar mensagem"
+            onClick={clearSuccessMessage}
+          >
+            ×
+          </button>
+        </section>
+      )}
 
       <section aria-label="Quadro Kanban">
         {columns.map((column) => (
@@ -148,6 +186,11 @@ function App() {
               setIsTaskFormOpen(true);
             }}
             onDropTask={dropTask}
+            onCreateTask={(status) => {
+              setSelectedTask(null);
+              setInitialTaskStatus(status);
+              setIsTaskFormOpen(true);
+            }}
           />
         ))}
       </section>
@@ -193,9 +236,9 @@ function App() {
             onSubmit={async (input) => {
               const success = selectedTask
                 ? await updateTask(
-                    selectedTask.id,
-                    input,
-                  )
+                  selectedTask.id,
+                  input,
+                )
                 : await createTask(input);
 
               if (success) {
@@ -205,6 +248,7 @@ function App() {
               return success;
             }}
             onCancel={closeTaskForm}
+            initialStatus={initialTaskStatus}
           />
         </Modal>
       )}
@@ -243,7 +287,7 @@ function App() {
               onClick={async () => {
                 const success =
                   await deleteTask(
-                    taskToDelete.id,
+                    taskToDelete,
                   );
 
                 if (success) {

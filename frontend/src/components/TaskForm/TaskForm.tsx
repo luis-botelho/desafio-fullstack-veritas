@@ -1,13 +1,16 @@
 import { useState } from "react";
 
+import "./TaskForm.css";
+
 import type {
   Task,
   TaskStatus,
   UpdateTaskInput,
-} from "../types/task";
+} from "../../types/task";
 
 interface TaskFormProps {
   task?: Task;
+  initialStatus?: TaskStatus;
   isSubmitting: boolean;
   onSubmit: (
     input: UpdateTaskInput,
@@ -17,20 +20,27 @@ interface TaskFormProps {
 
 export function TaskForm({
   task,
+  initialStatus = "todo",
   isSubmitting,
   onSubmit,
   onCancel,
 }: TaskFormProps) {
-  const [title, setTitle] = useState(task?.title ?? "");
-  const [description, setDescription] = useState(
-    task?.description ?? "",
+  const [title, setTitle] = useState(
+    task?.title ?? "",
   );
-  const [status, setStatus] = useState<TaskStatus>(
-    task?.status ?? "todo",
-  );
-  const [validationError, setValidationError] = useState<
-    string | null
-  >(null);
+
+  const [description, setDescription] =
+    useState(task?.description ?? "");
+
+  const [status, setStatus] =
+    useState<TaskStatus>(
+      task?.status ?? initialStatus,
+    );
+
+  const [
+    validationError,
+    setValidationError,
+  ] = useState<string | null>(null);
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>,
@@ -38,7 +48,9 @@ export function TaskForm({
     event.preventDefault();
 
     if (!title.trim()) {
-      setValidationError("Informe o título da tarefa.");
+      setValidationError(
+        "Informe o título da tarefa.",
+      );
       return;
     }
 
@@ -53,12 +65,15 @@ export function TaskForm({
     if (success && !task) {
       setTitle("");
       setDescription("");
-      setStatus("todo");
+      setStatus(initialStatus);
     }
   }
 
   return (
-    <form className="task-form" onSubmit={handleSubmit}>
+    <form
+      className="task-form"
+      onSubmit={handleSubmit}
+    >
       <div>
         <label htmlFor="task-title">
           Título
@@ -70,11 +85,11 @@ export function TaskForm({
           value={title}
           maxLength={120}
           disabled={isSubmitting}
+          placeholder="Ex.: Implementar tela inicial"
+          autoFocus
           onChange={(event) => {
             setTitle(event.target.value);
           }}
-          placeholder="Ex.: Implementar tela inicial"
-          autoFocus
         />
       </div>
 
@@ -88,11 +103,11 @@ export function TaskForm({
           value={description}
           maxLength={500}
           disabled={isSubmitting}
+          placeholder="Detalhes da tarefa"
+          rows={4}
           onChange={(event) => {
             setDescription(event.target.value);
           }}
-          placeholder="Detalhes da tarefa"
-          rows={4}
         />
       </div>
 
@@ -106,14 +121,22 @@ export function TaskForm({
           value={status}
           disabled={isSubmitting}
           onChange={(event) => {
-            setStatus(event.target.value as TaskStatus);
+            setStatus(
+              event.target.value as TaskStatus,
+            );
           }}
         >
-          <option value="todo">A Fazer</option>
+          <option value="todo">
+            A Fazer
+          </option>
+
           <option value="in_progress">
             Em Progresso
           </option>
-          <option value="done">Concluídas</option>
+
+          <option value="done">
+            Concluídas
+          </option>
         </select>
       </div>
 

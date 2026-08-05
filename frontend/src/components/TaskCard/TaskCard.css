@@ -1,0 +1,94 @@
+.task-card {
+  position: relative;
+
+  padding: 17px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+
+  background: var(--color-surface);
+  color: var(--color-text);
+
+  cursor: grab;
+
+  box-shadow: var(--shadow-sm);
+
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.task-card::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 0;
+
+  width: 3px;
+
+  border-radius: 0 999px 999px 0;
+
+  background: var(--color-primary);
+
+  content: "";
+  opacity: 0;
+
+  transition: opacity 160ms ease;
+}
+
+.task-card:hover {
+  border-color: #cdd2df;
+
+  box-shadow: var(--shadow-md);
+
+  transform: translateY(-2px);
+}
+
+.task-card:hover::before {
+  opacity: 1;
+}
+
+.task-card:active {
+  cursor: grabbing;
+}
+
+.task-card:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.task-card--dragging {
+  opacity: 0.42;
+
+  transform: rotate(1deg) scale(0.98);
+}
+
+.task-card__content {
+  min-width: 0;
+}
+
+.task-card__content h3 {
+  margin: 0;
+
+  color: var(--color-text);
+
+  font-size: 0.98rem;
+  line-height: 1.4;
+}
+
+.task-card__content p {
+  display: -webkit-box;
+  overflow: hidden;
+
+  margin: 9px 0 0;
+
+  color: var(--color-text-muted);
+
+  font-size: 0.88rem;
+  line-height: 1.55;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
