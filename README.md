@@ -7,7 +7,7 @@
 Aplicação full stack para criar, organizar e mover tarefas em um quadro Kanban.
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0.2-3178C6?style=flat&logo=typescript&logoColor=white)
 ![Go](https://img.shields.io/badge/Go-1.22-00ADD8?style=flat&logo=go&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat&logo=vite&logoColor=white)
 ![Status](https://img.shields.io/badge/status-MVP%20concluído-2ECC71?style=flat)
@@ -43,8 +43,8 @@ próprio README técnico:
 
 ## 🧭 Fluxo de uso
 
-O fluxo completo — criação, edição, movimentação e exclusão, incluindo os
-caminhos de erro — está documentado em [`docs/user-flow.png`](./docs/user-flow.png),
+Os principais fluxos de criação, edição, movimentação e exclusão estão
+documentados em [`docs/user-flow.png`](./docs/user-flow.png),
 com o fonte editável em [`docs/user-flow.mmd`](./docs/user-flow.mmd) (sintaxe Mermaid).
 
 ![User Flow do Mini Kanban](./docs/user-flow.png)
@@ -134,8 +134,8 @@ Detalhes de payload, validações e status HTTP: [`backend/README.md`](./backend
 cd backend && go test ./... -v
 ```
 
-O backend tem cobertura de domínio e repository (regras de validação, CRUD,
-ordenação, concorrência). **Os handlers HTTP e o frontend ainda não têm testes
+O backend tem cobertura de domínio e repository (regras de validação, CRUD e
+ordenação). **Os handlers HTTP e o frontend ainda não têm testes
 automatizados** — validados manualmente durante o desenvolvimento. Está listado
 abaixo como próximo passo, não escondido.
 
