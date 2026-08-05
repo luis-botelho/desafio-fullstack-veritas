@@ -169,7 +169,7 @@ O User Flow documenta as principais ações realizadas pelo usuário:
 
 <p align="center">
   <img
-    src="./docs/assets/user-flow.png"
+    src="./docs/user-flow.png"
     alt="User Flow do Mini Kanban"
     width="1000"
   />
@@ -177,7 +177,7 @@ O User Flow documenta as principais ações realizadas pelo usuário:
 
 Arquivos:
 
-- [`docs/assets/user-flow.png`](./docs/assets/user-flow.png)
+- [`docs/assets/user-flow.png`](./docs/user-flow.png)
 - [`docs/user-flow.mmd`](./docs/user-flow.mmd)
 
 ---
@@ -189,7 +189,7 @@ de tarefas, o serviço HTTP, a API em Go e o armazenamento em memória.
 
 <p align="center">
   <img
-    src="./docs/assets/data-flow.png"
+    src="./docs/data-flow.png"
     alt="Data Flow do Mini Kanban"
     width="1000"
   />
@@ -197,7 +197,7 @@ de tarefas, o serviço HTTP, a API em Go e o armazenamento em memória.
 
 Arquivos:
 
-- [`docs/assets/data-flow.png`](./docs/assets/data-flow.png)
+- [`docs/assets/data-flow.png`](./docs/data-flow.png)
 - [`docs/data-flow.mmd`](./docs/data-flow.mmd)
 
 ---
