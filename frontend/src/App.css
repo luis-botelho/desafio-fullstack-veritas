@@ -327,3 +327,60 @@ select:disabled {
 .danger-button:hover {
   background: #b91c1c;
 }
+.task-card__move-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.task-card__move-actions button {
+  padding: 8px 12px;
+
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.task-card__move-actions button:hover:not(:disabled) {
+  background: #bae6fd;
+}
+.task-card {
+  cursor: grab;
+}
+
+.task-card:active {
+  cursor: grabbing;
+}
+
+.task-card--dragging {
+  opacity: 0.45;
+  transform: rotate(1deg) scale(0.98);
+}
+
+.task-card__move-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.task-card__move-actions button {
+  padding: 8px 12px;
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.task-card__move-actions button:hover:not(:disabled) {
+  background: #bae6fd;
+}
+
+.kanban-column {
+  border: 2px solid transparent;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.kanban-column--drag-over {
+  border-color: #2563eb;
+  background: #eff6ff;
+  transform: translateY(-2px);
+}

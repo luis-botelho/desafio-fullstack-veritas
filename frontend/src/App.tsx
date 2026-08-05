@@ -3,6 +3,7 @@ import { useState } from "react";
 import "./App.css";
 
 import { KanbanColumn } from "./components/KanbanColumn";
+import { Modal } from "./components/Modal";
 import { TaskForm } from "./components/TaskForm";
 import { useTasks } from "./hooks/useTasks";
 
@@ -32,13 +33,13 @@ const columns: KanbanColumnConfig[] = [
 ];
 
 function App() {
-  const [taskToDelete, setTaskToDelete] =
-    useState<Task | null>(null);
-
   const [isTaskFormOpen, setIsTaskFormOpen] =
     useState(false);
 
   const [selectedTask, setSelectedTask] =
+    useState<Task | null>(null);
+
+  const [taskToDelete, setTaskToDelete] =
     useState<Task | null>(null);
 
   const {
@@ -56,6 +57,40 @@ function App() {
   function closeTaskForm() {
     setIsTaskFormOpen(false);
     setSelectedTask(null);
+  }
+
+  function moveTask(
+    task: Task,
+    status: TaskStatus,
+  ) {
+    if (
+      task.status === status ||
+      isSubmitting
+    ) {
+      return;
+    }
+
+    void updateTask(task.id, {
+      title: task.title,
+      description: task.description,
+      status,
+    });
+  }
+
+  function dropTask(
+    taskId: string,
+    status: TaskStatus,
+  ) {
+    const task = tasks.find(
+      (currentTask) =>
+        currentTask.id === taskId,
+    );
+
+    if (!task) {
+      return;
+    }
+
+    moveTask(task, status);
   }
 
   if (isLoading) {
@@ -108,136 +143,120 @@ function App() {
             title={column.title}
             status={column.status}
             tasks={tasks}
-            onEditTask={(task) => {
+            onOpenTask={(task) => {
               setSelectedTask(task);
               setIsTaskFormOpen(true);
             }}
-            onDeleteTask={(task) => {
-              setTaskToDelete(task);
-            }}
+            onDropTask={dropTask}
           />
         ))}
       </section>
 
       {isTaskFormOpen && (
-        <div className="modal-backdrop">
-          <section
-            className="modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="task-form-title"
-          >
-            <header>
-              <div>
-                <p>
-                  {selectedTask
-                    ? "Editar tarefa"
-                    : "Nova tarefa"}
-                </p>
-
-                <h2 id="task-form-title">
-                  {selectedTask
-                    ? "Atualizar tarefa"
-                    : "Adicionar ao quadro"}
-                </h2>
-              </div>
-
-              <button
-                type="button"
-                aria-label="Fechar formulário"
-                onClick={closeTaskForm}
-              >
-                ×
-              </button>
-            </header>
-
-            <TaskForm
-              key={selectedTask?.id ?? "new-task"}
-              task={selectedTask ?? undefined}
-              isSubmitting={isSubmitting}
-              onSubmit={async (input) => {
-                const success = selectedTask
-                  ? await updateTask(
-                    selectedTask.id,
-                    input,
-                  )
-                  : await createTask(input);
-
-                if (success) {
-                  closeTaskForm();
-                }
-
-                return success;
-              }}
-              onCancel={closeTaskForm}
-            />
-          </section>
-        </div>
-      )}
-      {taskToDelete && (
-        <div className="modal-backdrop">
-          <section
-            className="modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-task-title"
-          >
-            <header>
-              <div>
-                <p>Excluir tarefa</p>
-                <h2 id="delete-task-title">
-                  Confirmar exclusão
-                </h2>
-              </div>
-
-              <button
-                type="button"
-                aria-label="Fechar confirmação"
-                onClick={() => {
-                  setTaskToDelete(null);
-                }}
-              >
-                ×
-              </button>
-            </header>
-
-            <p>
-              Tem certeza que deseja excluir{" "}
-              <strong>{taskToDelete.title}</strong>?
-            </p>
-
-            <div className="delete-dialog__actions">
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={() => {
-                  setTaskToDelete(null);
-                }}
-              >
-                Cancelar
-              </button>
-
+        <Modal
+          eyebrow={
+            selectedTask
+              ? "Editar tarefa"
+              : "Nova tarefa"
+          }
+          title={
+            selectedTask
+              ? "Atualizar tarefa"
+              : "Adicionar ao quadro"
+          }
+          onClose={closeTaskForm}
+          headerActions={
+            selectedTask ? (
               <button
                 type="button"
                 className="danger-button"
                 disabled={isSubmitting}
-                onClick={async () => {
-                  const success = await deleteTask(
+                onClick={() => {
+                  setTaskToDelete(selectedTask);
+                  closeTaskForm();
+                }}
+              >
+                Excluir
+              </button>
+            ) : undefined
+          }
+        >
+          <TaskForm
+            key={
+              selectedTask?.id ??
+              "new-task"
+            }
+            task={
+              selectedTask ?? undefined
+            }
+            isSubmitting={isSubmitting}
+            onSubmit={async (input) => {
+              const success = selectedTask
+                ? await updateTask(
+                    selectedTask.id,
+                    input,
+                  )
+                : await createTask(input);
+
+              if (success) {
+                closeTaskForm();
+              }
+
+              return success;
+            }}
+            onCancel={closeTaskForm}
+          />
+        </Modal>
+      )}
+
+      {taskToDelete && (
+        <Modal
+          eyebrow="Excluir tarefa"
+          title="Confirmar exclusão"
+          onClose={() => {
+            setTaskToDelete(null);
+          }}
+        >
+          <p>
+            Tem certeza que deseja excluir{" "}
+            <strong>
+              {taskToDelete.title}
+            </strong>
+            ?
+          </p>
+
+          <div className="delete-dialog__actions">
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={() => {
+                setTaskToDelete(null);
+              }}
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              className="danger-button"
+              disabled={isSubmitting}
+              onClick={async () => {
+                const success =
+                  await deleteTask(
                     taskToDelete.id,
                   );
 
-                  if (success) {
-                    setTaskToDelete(null);
-                  }
-                }}
-              >
-                {isSubmitting
-                  ? "Excluindo..."
-                  : "Excluir tarefa"}
-              </button>
-            </div>
-          </section>
-        </div>
+                if (success) {
+                  setTaskToDelete(null);
+                }
+              }}
+            >
+              {isSubmitting
+                ? "Excluindo..."
+                : "Excluir tarefa"}
+            </button>
+          </div>
+        </Modal>
       )}
     </main>
   );
