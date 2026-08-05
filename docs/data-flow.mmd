@@ -1,0 +1,43 @@
+flowchart LR
+    U["Usuário"]
+
+    subgraph F["Frontend React"]
+        UI["Interface Kanban"]
+        H["useTasks"]
+        S["taskApi"]
+    end
+
+    subgraph B["Backend Go"]
+        R["Chi Router"]
+        HTTP["TaskHandler"]
+        D["Domain Task"]
+        M["MemoryTaskRepository"]
+    end
+
+    MEM[("Map em memória")]
+
+    U -->|"Clica, digita ou arrasta"| UI
+    UI -->|"Ações de criar, editar, mover e excluir"| H
+    H -->|"Chama funções da API"| S
+
+    S -->|"GET /tasks"| R
+    S -->|"POST /tasks"| R
+    S -->|"PUT /tasks/{id}"| R
+    S -->|"DELETE /tasks/{id}"| R
+
+    R --> HTTP
+
+    HTTP -->|"Cria ou atualiza entidade"| D
+    D -->|"Task validada"| HTTP
+
+    HTTP -->|"Lista, salva, busca ou exclui"| M
+    M --> MEM
+    MEM --> M
+
+    M -->|"Dados da tarefa"| HTTP
+    HTTP -->|"Resposta JSON + status HTTP"| R
+    R -->|"Resposta HTTP"| S
+
+    S -->|"Dados ou erro"| H
+    H -->|"Atualiza estado React"| UI
+    UI -->|"Feedback visual"| U
